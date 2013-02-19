@@ -25,7 +25,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "iTextSharp-5.0.0", "iTextSh
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E8B4F5C5-6B0A-4C3F-AA90-302157A17A3F}"
 	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
 		AssemblyVersionInfo.cs = AssemblyVersionInfo.cs
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global
