@@ -120,6 +120,8 @@ namespace DAIS.eBank.Services.PDF.Signer
         /// <param name="logEntryType">entry type to log event as</param>
         public static void WriteToEventLog(string logEntry, string eventSource, string logName, EventLogEntryType logEntryType)
         {
+            try
+            {
             //Register the App as an Event Source
             if(!EventLog.SourceExists(eventSource))
             {
@@ -133,6 +135,12 @@ namespace DAIS.eBank.Services.PDF.Signer
                 }
             }
             EventLog.WriteEntry(eventSource, logEntry, logEntryType);
+        }
+            catch(Exception e)
+            {//user has never run the app as admin
+                System.Diagnostics.Trace.TraceInformation("Unable to write any type of event entry. You MUST run your browser as administrator the first time! {0}", e.ToString());
+                System.Diagnostics.Trace.TraceError(e.ToString());
+            }
         }
     }
 }
