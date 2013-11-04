@@ -46,35 +46,43 @@ using iTextSharp.text.pdf;
 namespace DAIS.eBank.Services.PDF.Management
 {
     public class CPDFManager
-    {
+    {        
         private const string ENCODING = "windows-1251";
 
-        public static byte[] WindowsSign(byte[] pdfData, X509Certificate2 cert_NET)
+        public static byte[] WindowsSign(byte[] pdfData, X509Certificate2 cert_NET, bool allowChanges = false)
         {
             Org.BouncyCastle.X509.X509Certificate cert_JAVA = Org.BouncyCastle.Security.DotNetUtilities.FromX509Certificate(cert_NET);
             Org.BouncyCastle.X509.X509Certificate[] chain = new Org.BouncyCastle.X509.X509Certificate[] { cert_JAVA };
-            
+
             RSACryptoServiceProvider rsa = (RSACryptoServiceProvider)cert_NET.PrivateKey;
             RSAParameters rsaParam = rsa.ExportParameters(true);
             Org.BouncyCastle.Crypto.Parameters.RsaPrivateCrtKeyParameters BCKeyParms = new Org.BouncyCastle.Crypto.Parameters.RsaPrivateCrtKeyParameters(
-                new Org.BouncyCastle.Math.BigInteger(1, rsaParam.Modulus),/*modulus*/
-                new Org.BouncyCastle.Math.BigInteger(1, rsaParam.Exponent),/*publicExponent*/
-                new Org.BouncyCastle.Math.BigInteger(1, rsaParam.D),/*privateExponent*/
-                new Org.BouncyCastle.Math.BigInteger(1, rsaParam.P),/*p*/
-                new Org.BouncyCastle.Math.BigInteger(1, rsaParam.Q),/*q*/
-                new Org.BouncyCastle.Math.BigInteger(1, rsaParam.DP),/*dP*/
-                new Org.BouncyCastle.Math.BigInteger(1, rsaParam.DQ),/*dQ*/
-                new Org.BouncyCastle.Math.BigInteger(1, rsaParam.InverseQ));/*qInv*/
+new Org.BouncyCastle.Math.BigInteger(1, rsaParam.Modulus),/*modulus*/
+new Org.BouncyCastle.Math.BigInteger(1, rsaParam.Exponent),/*publicExponent*/
+new Org.BouncyCastle.Math.BigInteger(1, rsaParam.D),/*privateExponent*/
+new Org.BouncyCastle.Math.BigInteger(1, rsaParam.P),/*p*/
+new Org.BouncyCastle.Math.BigInteger(1, rsaParam.Q),/*q*/
+new Org.BouncyCastle.Math.BigInteger(1, rsaParam.DP),/*dP*/
+new Org.BouncyCastle.Math.BigInteger(1, rsaParam.DQ),/*dQ*/
+new Org.BouncyCastle.Math.BigInteger(1, rsaParam.InverseQ));/*qInv*/
 
             PdfReader reader = new PdfReader(pdfData);
+            reader.Appendable = true;
 
             MemoryStream msOut = new MemoryStream();
 
-            PdfStamper st = PdfStamper.CreateSignature(reader, msOut, '\0');
+            PdfStamper st = PdfStamper.CreateSignature(reader, msOut, '\0', null, true);
 
             PdfSignatureAppearance sap = st.SignatureAppearance;
 
+            if(allowChanges)
+            {
+                sap.CertificationLevel = PdfSignatureAppearance.CERTIFIED_FORM_FILLING_AND_ANNOTATIONS;
+            }
+            else
+            {
             sap.CertificationLevel = PdfSignatureAppearance.CERTIFIED_NO_CHANGES_ALLOWED;
+            }
 
             sap.SetCrypto(BCKeyParms, chain, null, PdfSignatureAppearance.WINCER_SIGNED);
 
